@@ -1,7 +1,8 @@
 #include <Security/Security.h>
 #include "keytar.h"
 #include "credentials.h"
-
+#include "mac_c.interface.h"
+#include "authentication.h"
 
 namespace keytar {
 
@@ -54,10 +55,11 @@ const std::string errorStatusToString(OSStatus status) {
   return errorStr;
 }
 
-KEYTAR_OP_RESULT AddPassword(const std::string& service,
-                             const std::string& account,
-                             const std::string& password,
-                             std::string* error) {
+KEYTAR_OP_RESULT AddPassword(const std::string &service,
+                             const std::string &account,
+                             const std::string &password,
+                             std::string *error)
+{
   OSStatus status = SecKeychainAddGenericPassword(NULL,
                                                   service.length(),
                                                   service.data(),
@@ -75,10 +77,11 @@ KEYTAR_OP_RESULT AddPassword(const std::string& service,
   return SUCCESS;
 }
 
-KEYTAR_OP_RESULT SetPassword(const std::string& service,
-                             const std::string& account,
-                             const std::string& password,
-                             std::string* error) {
+KEYTAR_OP_RESULT SetPassword(const std::string &service,
+                             const std::string &account,
+                             const std::string &password,
+                             std::string *error)
+{
   SecKeychainItemRef item;
   OSStatus result = SecKeychainFindGenericPassword(NULL,
                                                    service.length(),
@@ -113,6 +116,11 @@ KEYTAR_OP_RESULT GetPassword(const std::string& service,
                              const std::string& account,
                              std::string* password,
                              std::string* error) {
+  if (ShouldAuthenticatePresence(service, account, error) && !AuthenticatePresence())
+  {
+    return FAIL_ERROR;
+  }
+
   void *data;
   UInt32 length;
   OSStatus status = SecKeychainFindGenericPassword(NULL,
