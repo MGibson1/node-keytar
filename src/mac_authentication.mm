@@ -22,6 +22,8 @@
                                                       biometricSuccess = success;
                                                     }];
 
+    CFRelease(error);
+
     // Wait until prompt is returned
     while (!returned) {
       [NSThread sleepForTimeInterval:0.1f];
