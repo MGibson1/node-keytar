@@ -20,15 +20,28 @@
         'src/main.cc',
         'src/keytar.h',
         'src/credentials.h',
+        'src/authentication.cc',
+        'src/authentication.h'
       ],
       'conditions': [
         ['OS=="mac"', {
+          'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
+          'defines': [ 'NAPI_DISABLE_CPP_EXCEPTIONS' ],
           'sources': [
             'src/keytar_mac.cc',
+            'src/mac_c.interface.h',
+            'src/mac_authentication.h',
+            'src/mac_authentication.mm',
           ],
+          'xcode_settings': {
+            'CLANG_CXX_LIBRARY': 'libc++',
+            'MACOSX_DEPLOYMENT_TARGET': '10.8'
+          },
           'link_settings': {
             'libraries': [
               '$(SDKROOT)/System/Library/Frameworks/AppKit.framework',
+              '$(SDKROOT)/System/Library/Frameworks/LocalAuthentication.framework',
+              '$(SDKROOT)/System/Library/Frameworks/Security.framework',
             ],
           },
         }],
